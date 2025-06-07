@@ -36,25 +36,31 @@ Um ponto de partida simples, moderno e organizado para criar APIs Node.js com Ty
    cd layered-api-starter
    ```
 
-2. **Instale as dependências**
+2. **Instale o pnpm (caso ainda não tenha)**
 
    ```bash
-   npm install
+   npm install -g pnpm
    ```
 
-3. **Configure as variáveis de ambiente**
+3. **Instale as dependências**
+
+   ```bash
+   pnpm install
+   ```
+
+4. **Configure as variáveis de ambiente**
    - Copie `.env.example` para `.env` e preencha as variáveis necessárias.
 
-4. **Rode as migrations do banco**
+5. **Rode as migrations do banco**
 
    ```bash
-   npm run prisma:migrate
+   pnpm prisma:migrate
    ```
 
-5. **Inicie o servidor em modo desenvolvimento**
+6. **Inicie o servidor em modo desenvolvimento**
 
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
    Acesse: [http://localhost:3000](http://localhost:3000)
