@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { UserDAO } from '../daos/UserDAO'
+import { HttpStatus } from '../enums/httpStatus'
 import { UserRepository } from '../repositories/UserRepository'
 import { UserService } from '../services/UserService'
 
@@ -17,10 +18,10 @@ export class UserController {
         message: e.messagewww
       }))
       return res
-        .status(400)
+        .status(HttpStatus.BAD_REQUEST)
         .json({ error: 'Erro de validação', details: errors })
     }
-    const statusCode = err.statusCode || 400
+    const statusCode = err.statusCode || HttpStatus.BAD_REQUEST
     const message = err.message || 'Erro inesperado'
     res.status(statusCode).json({ error: message })
   }
@@ -30,7 +31,7 @@ export class UserController {
       // Recebe dados do body 📦
       const { name, email, password } = req.body
       const user = await userService.createUser({ name, email, password })
-      res.status(201).json(user) // Retorna usuário criado 🎉
+      res.status(HttpStatus.CREATED).json(user) // Retorna usuário criado 🎉
     } catch (err: any) {
       UserController.handleError(res, err)
     }
@@ -40,7 +41,9 @@ export class UserController {
     const id = req.params.id
     const user = await userService.getUserById(id)
     if (!user) {
-      res.status(404).json({ error: 'Usuário não encontrado!' })
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ error: 'Usuário não encontrado!' })
       return
     }
     res.json(user)
@@ -52,7 +55,9 @@ export class UserController {
       const { name, email, password } = req.body
       const user = await userService.updateUser(id, { name, email, password })
       if (!user) {
-        res.status(404).json({ error: 'Usuário não encontrado!' })
+        res
+          .status(HttpStatus.NOT_FOUND)
+          .json({ error: 'Usuário não encontrado!' })
         return
       }
       res.json(user)
@@ -65,10 +70,12 @@ export class UserController {
     const id = req.params.id
     const deleted = await userService.deleteUser(id)
     if (!deleted) {
-      res.status(404).json({ error: 'Usuário não encontrado!' })
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ error: 'Usuário não encontrado!' })
       return
     }
-    res.status(204).send()
+    res.status(HttpStatus.NO_CONTENT).send()
   }
 
   static async listUsers(req: Request, res: Response): Promise<void> {

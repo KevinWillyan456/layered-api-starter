@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
+import { HttpStatus } from '../enums/httpStatus'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret'
 
@@ -10,13 +11,13 @@ export function authMiddleware(
 ): void {
   const authHeader = req.headers.authorization
   if (!authHeader) {
-    res.status(401).json({ error: 'Token não fornecido.' })
+    res.status(HttpStatus.UNAUTHORIZED).json({ error: 'Token não fornecido.' })
     return
   }
 
   const [, token] = authHeader.split(' ')
   if (!token) {
-    res.status(401).json({ error: 'Token mal formatado.' })
+    res.status(HttpStatus.UNAUTHORIZED).json({ error: 'Token mal formatado.' })
     return
   }
 
@@ -28,7 +29,7 @@ export function authMiddleware(
     console.log('Token decodificado:', decoded) // Para depuração
     next()
   } catch (err) {
-    res.status(401).json({ error: 'Token inválido.' })
+    res.status(HttpStatus.UNAUTHORIZED).json({ error: 'Token inválido.' })
     return
   }
 }

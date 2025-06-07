@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { CreateUserDTO } from '../dtos/CreateUserDTO'
 import { UpdateUserDTO } from '../dtos/UpdateUserDTO'
 import { UserResponseDTO } from '../dtos/UserResponseDTO'
+import { toUserResponseDTO } from '../mappers/userMapper'
 import { UserRepository } from '../repositories/UserRepository'
 
 const createUserSchema = z.object({
@@ -47,9 +48,7 @@ export class UserService {
       expiresIn: '1h'
     })
     return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
+      ...toUserResponseDTO(user),
       token: `Bearer ${token}`
     }
   }
@@ -58,7 +57,7 @@ export class UserService {
     // Busca usuário por ID 🔍
     const user = await this.userRepository.findById(id)
     if (!user) return null
-    return { id: user.id, name: user.name, email: user.email }
+    return toUserResponseDTO(user)
   }
 
   async updateUser(
@@ -78,7 +77,7 @@ export class UserService {
     // Atualiza usuário
     const user = await this.userRepository.updateUser(id, data)
     if (!user) return null
-    return { id: user.id, name: user.name, email: user.email }
+    return toUserResponseDTO(user)
   }
 
   async deleteUser(id: string): Promise<boolean> {
@@ -90,6 +89,6 @@ export class UserService {
   async listUsers(): Promise<UserResponseDTO[]> {
     // Lista todos os usuários
     const users = await this.userRepository.findAll()
-    return users.map((u) => ({ id: u.id, name: u.name, email: u.email }))
+    return users.map(toUserResponseDTO)
   }
 }
