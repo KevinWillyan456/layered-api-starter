@@ -3,6 +3,7 @@ import { UserDAO } from '../daos/UserDAO'
 import { HttpStatus } from '../enums/httpStatus'
 import {
   toCreateUserDTO,
+  toLoginUserDTO,
   toUpdateUserDTO
 } from '../mappers/input/userInputMapper'
 import { UserRepository } from '../repositories/UserRepository'
@@ -28,13 +29,7 @@ export class UserController {
     const id = req.params.id
     try {
       const user = await userService.getUserById(id)
-      if (!user) {
-        res
-          .status(HttpStatus.NOT_FOUND)
-          .json({ error: 'Usuário não encontrado!' })
-        return
-      }
-      res.json(user)
+      res.status(HttpStatus.OK).json(user) // Retorna usuário encontrado ✅
     } catch (err: unknown) {
       HandleError.handleError(res, err)
     }
@@ -45,7 +40,7 @@ export class UserController {
     try {
       const userInput = toUpdateUserDTO(req.body)
       const user = await userService.updateUser(id, userInput)
-      res.json(user)
+      res.status(HttpStatus.OK).json(user) // Retorna usuário atualizado ✅
     } catch (err: unknown) {
       HandleError.handleError(res, err)
     }
@@ -54,14 +49,8 @@ export class UserController {
   static async deleteUser(req: Request, res: Response): Promise<void> {
     const id = req.params.id
     try {
-      const deleted = await userService.deleteUser(id)
-      if (!deleted) {
-        res
-          .status(HttpStatus.NOT_FOUND)
-          .json({ error: 'Usuário não encontrado!' })
-        return
-      }
-      res.status(HttpStatus.NO_CONTENT).send()
+      await userService.deleteUser(id)
+      res.status(HttpStatus.NO_CONTENT).send() // Retorna 204 No Content após exclusão 🗑️
     } catch (err: unknown) {
       HandleError.handleError(res, err)
     }
@@ -70,7 +59,7 @@ export class UserController {
   static async listUsers(req: Request, res: Response): Promise<void> {
     try {
       const users = await userService.listUsers()
-      res.json(users)
+      res.status(HttpStatus.OK).json(users) // Retorna lista de usuários 📋
     } catch (err: unknown) {
       HandleError.handleError(res, err)
     }
@@ -78,9 +67,9 @@ export class UserController {
 
   static async login(req: Request, res: Response): Promise<void> {
     try {
-      const { email, password } = req.body
-      const result = await userService.login({ email, password })
-      res.json(result)
+      const userInput = toLoginUserDTO(req.body)
+      const result = await userService.login(userInput)
+      res.status(HttpStatus.OK).json(result) // Retorna token de autenticação 🔑
     } catch (err: unknown) {
       HandleError.handleError(res, err)
     }

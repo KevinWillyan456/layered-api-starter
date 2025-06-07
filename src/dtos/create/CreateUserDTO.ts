@@ -1,6 +1,5 @@
+import { z } from 'zod'
+import { createUserSchema } from '../../schemas/userSchemas'
+
 // DTO para criar usuário 🚀
-export interface CreateUserDTO {
-  name: string // Nome do usuário 🧑
-  email: string // E-mail do usuário 📧
-  password: string // Senha do usuário 🔒
-}
+export type CreateUserDTO = z.infer<typeof createUserSchema>

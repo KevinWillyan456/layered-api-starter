@@ -1,6 +1,5 @@
+import { z } from 'zod'
+import { updateUserSchema } from '../../schemas/userSchemas'
+
 // DTO para atualizar usuário ✏️
-export interface UpdateUserDTO {
-  name?: string
-  email?: string
-  password?: string
-}
+export type UpdateUserDTO = z.infer<typeof updateUserSchema>

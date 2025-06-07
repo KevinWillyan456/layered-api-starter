@@ -10,11 +10,6 @@ import {
   toUsersResponseDTO
 } from '../mappers/output/userOutputMapper'
 import { UserRepository } from '../repositories/UserRepository'
-import {
-  createUserSchema,
-  loginSchema,
-  updateUserSchema
-} from '../schemas/userSchemas'
 import { HttpError } from '../utils/HttpError'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret'
@@ -30,7 +25,6 @@ export class UserService {
   async createUser(
     dto: CreateUserDTO
   ): Promise<UserResponseDTO & { token: string }> {
-    createUserSchema.parse(dto)
     // Verifica se o e-mail já existe 🚫
     const exists = await this.userRepository.findByEmail(dto.email)
     if (exists) {
@@ -56,9 +50,18 @@ export class UserService {
   }
 
   async getUserById(id: string): Promise<UserResponseDTO | null> {
-    // Busca usuário por ID 🔍
+    if (!id) {
+      throw new HttpError(
+        'ID do usuário é obrigatório!',
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
+    // Verifica se o Usário existe antes de buscar 🔍
     const user = await this.userRepository.findById(id)
-    if (!user) return null
+    if (!user) {
+      throw new HttpError('Usuário não encontrado!', HttpStatus.NOT_FOUND)
+    }
     return toUserResponseDTO(user)
   }
 
@@ -66,13 +69,18 @@ export class UserService {
     id: string,
     dto: UpdateUserDTO
   ): Promise<UserResponseDTO | null> {
+    if (!id) {
+      throw new HttpError(
+        'ID do usuário é obrigatório!',
+        HttpStatus.BAD_REQUEST
+      )
+    }
     // Verifica se o usário existe
     const exists = await this.userRepository.findById(id)
     if (!exists) {
       throw new HttpError('Usuário não encontrado!', HttpStatus.NOT_FOUND)
     }
 
-    updateUserSchema.parse(dto)
     // Verifica se o e-mail já existe e não pertence ao próprio usuário 🚫
     if (dto.email) {
       const exists = await this.userRepository.findByEmail(dto.email)
@@ -94,6 +102,13 @@ export class UserService {
   }
 
   async deleteUser(id: string): Promise<boolean> {
+    if (!id) {
+      throw new HttpError(
+        'ID do usuário é obrigatório!',
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
     // Verifica se o usuário existe antes de deletar
     const exists = await this.userRepository.findById(id)
     if (!exists) {
@@ -121,7 +136,6 @@ export class UserService {
     email: string
     password: string
   }): Promise<{ token: string }> {
-    loginSchema.parse(dto)
     const user = await this.userRepository.findByEmail(dto.email)
     if (!user) {
       throw new HttpError('E-mail ou senha inválidos!')
