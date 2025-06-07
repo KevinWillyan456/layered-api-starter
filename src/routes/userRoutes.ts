@@ -7,6 +7,9 @@ export const router = Router()
 // Rota para criar usuário 🆕 (pública)
 router.post('/users', UserController.createUser)
 
+// Rota de login (pública)
+router.post('/login', UserController.login)
+
 // Rotas protegidas 🔒
 router.get('/users', authMiddleware, UserController.listUsers)
 router.get('/users/:id', authMiddleware, UserController.getUserById)

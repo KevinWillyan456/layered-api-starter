@@ -1,23 +1,18 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { z } from 'zod'
+import { bcryptConfig } from '../configs/bcryptConfig'
 import { CreateUserDTO } from '../dtos/CreateUserDTO'
 import { UpdateUserDTO } from '../dtos/UpdateUserDTO'
 import { UserResponseDTO } from '../dtos/UserResponseDTO'
+import { HttpStatus } from '../enums/httpStatus'
 import { toUserResponseDTO } from '../mappers/userMapper'
 import { UserRepository } from '../repositories/UserRepository'
-
-const createUserSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(6)
-})
-
-const updateUserSchema = z.object({
-  name: z.string().min(2).optional(),
-  email: z.string().email().optional(),
-  password: z.string().min(6).optional()
-})
+import {
+  createUserSchema,
+  loginSchema,
+  updateUserSchema
+} from '../schemas/userSchemas'
+import { HttpError } from '../utils/HttpError'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret'
 
@@ -35,10 +30,15 @@ export class UserService {
     createUserSchema.parse(dto)
     // Verifica se o e-mail já existe 🚫
     const exists = await this.userRepository.findByEmail(dto.email)
-    if (exists) throw new Error('E-mail já cadastrado!')
+    if (exists) {
+      throw new HttpError('E-mail já cadastrado!', HttpStatus.CONFLICT)
+    }
 
     // Cria usuário ✅
-    const hashedPassword = await bcrypt.hash(dto.password, 10)
+    const hashedPassword = await bcrypt.hash(
+      dto.password,
+      bcryptConfig.SALT_ROUNDS
+    )
     const user = await this.userRepository.createUser(
       dto.name,
       dto.email,
@@ -64,25 +64,47 @@ export class UserService {
     id: string,
     dto: UpdateUserDTO
   ): Promise<UserResponseDTO | null> {
+    // Verifica se o usário existe
+    const exists = await this.userRepository.findById(id)
+    if (!exists) {
+      throw new HttpError('Usuário não encontrado!', HttpStatus.NOT_FOUND)
+    }
+
     updateUserSchema.parse(dto)
     // Verifica se o e-mail já existe e não pertence ao próprio usuário 🚫
     if (dto.email) {
       const exists = await this.userRepository.findByEmail(dto.email)
-      if (exists && exists.id !== id) throw new Error('E-mail já cadastrado!')
+      if (exists && exists.id !== id) {
+        throw new HttpError('E-mail já cadastrado!', HttpStatus.CONFLICT)
+      }
     }
-    let data = { ...dto }
+    const data = { ...dto }
     if (dto.password) {
-      data.password = await bcrypt.hash(dto.password, 10)
+      data.password = await bcrypt.hash(dto.password, bcryptConfig.SALT_ROUNDS)
     }
     // Atualiza usuário
     const user = await this.userRepository.updateUser(id, data)
-    if (!user) return null
+    if (!user) {
+      throw new HttpError('Usuário não encontrado!', HttpStatus.NOT_FOUND)
+    }
     return toUserResponseDTO(user)
   }
 
   async deleteUser(id: string): Promise<boolean> {
+    // Verifica se o usuário existe antes de deletar
+    const exists = await this.userRepository.findById(id)
+    if (!exists) {
+      throw new HttpError('Usuário não encontrado!', HttpStatus.NOT_FOUND)
+    }
+
     // Deleta usuário
     const user = await this.userRepository.deleteUser(id)
+    if (!user) {
+      throw new HttpError(
+        'Não foi possível deletar o usuário!',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    }
     return !!user
   }
 
@@ -90,5 +112,24 @@ export class UserService {
     // Lista todos os usuários
     const users = await this.userRepository.findAll()
     return users.map(toUserResponseDTO)
+  }
+
+  async login(dto: {
+    email: string
+    password: string
+  }): Promise<{ token: string }> {
+    loginSchema.parse(dto)
+    const user = await this.userRepository.findByEmail(dto.email)
+    if (!user) {
+      throw new HttpError('E-mail ou senha inválidos!')
+    }
+    const valid = await bcrypt.compare(dto.password, user.password)
+    if (!valid) {
+      throw new HttpError('E-mail ou senha inválidos!', HttpStatus.UNAUTHORIZED)
+    }
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: '1h'
+    })
+    return { token: `Bearer ${token}` }
   }
 }

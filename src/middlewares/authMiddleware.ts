@@ -22,13 +22,14 @@ export function authMiddleware(
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET)
-    // Você pode adicionar o usuário decodificado ao request se quiser
-    ;(req as any).user = decoded
+    jwt.verify(token, JWT_SECRET)
 
-    console.log('Token decodificado:', decoded) // Para depuração
+    // Você pode adicionar o usuário decodificado ao request se quiser
+    // const decoded = jwt.verify(token, JWT_SECRET)
+    // ;(req as unknown as { user: unknown }).user = decoded
+
     next()
-  } catch (err) {
+  } catch {
     res.status(HttpStatus.UNAUTHORIZED).json({ error: 'Token inválido.' })
     return
   }
