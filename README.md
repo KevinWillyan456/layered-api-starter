@@ -20,10 +20,18 @@ Um ponto de partida simples, moderno e organizado para criar APIs Node.js com Ty
 
 ## 📁 Estrutura em Camadas
 
-- **Controllers** — Recebem requisições e retornam respostas
-- **Services** — Lógica de negócio
-- **Repositories** — Abstração de acesso a dados
-- **DAOs** — Comunicação direta com o banco de dados
+- **controllers/** — Recebem requisições e retornam respostas
+- **services/** — Lógica de negócio
+- **repositories/** — Abstração de acesso a dados
+- **daos/** — Comunicação direta com o banco de dados
+- **dtos/** — Data Transfer Objects (entrada, saída, atualização)
+- **mappers/** — Tratamento e transformação de dados de entrada/saída
+- **middlewares/** — Middlewares do Express (ex: autenticação)
+- **routes/** — Definição das rotas da API
+- **schemas/** — Schemas de validação (Zod)
+- **utils/** — Utilitários e helpers
+- **configs/** — Arquivos de configuração
+- **enums/** — Enumerações compartilhadas
 
 ---
 

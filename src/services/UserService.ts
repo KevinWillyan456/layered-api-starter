@@ -1,11 +1,14 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { bcryptConfig } from '../configs/bcryptConfig'
-import { CreateUserDTO } from '../dtos/CreateUserDTO'
-import { UpdateUserDTO } from '../dtos/UpdateUserDTO'
-import { UserResponseDTO } from '../dtos/UserResponseDTO'
+import { CreateUserDTO } from '../dtos/create/CreateUserDTO'
+import { UserResponseDTO } from '../dtos/response/UserResponseDTO'
+import { UpdateUserDTO } from '../dtos/update/UpdateUserDTO'
 import { HttpStatus } from '../enums/httpStatus'
-import { toUserResponseDTO } from '../mappers/userMapper'
+import {
+  toUserResponseDTO,
+  toUsersResponseDTO
+} from '../mappers/output/userOutputMapper'
 import { UserRepository } from '../repositories/UserRepository'
 import {
   createUserSchema,
@@ -39,11 +42,10 @@ export class UserService {
       dto.password,
       bcryptConfig.SALT_ROUNDS
     )
-    const user = await this.userRepository.createUser(
-      dto.name,
-      dto.email,
-      hashedPassword
-    )
+    const user = await this.userRepository.createUser({
+      ...dto,
+      password: hashedPassword
+    })
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
       expiresIn: '1h'
     })
@@ -79,6 +81,7 @@ export class UserService {
       }
     }
     const data = { ...dto }
+    // Se a senha foi informada, faz o hash antes de atualizar 🔒
     if (dto.password) {
       data.password = await bcrypt.hash(dto.password, bcryptConfig.SALT_ROUNDS)
     }
@@ -111,7 +114,7 @@ export class UserService {
   async listUsers(): Promise<UserResponseDTO[]> {
     // Lista todos os usuários
     const users = await this.userRepository.findAll()
-    return users.map(toUserResponseDTO)
+    return toUsersResponseDTO(users)
   }
 
   async login(dto: {

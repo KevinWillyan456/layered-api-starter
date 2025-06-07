@@ -1,14 +1,12 @@
 import { PrismaClient, User } from '@prisma/client'
+import { CreateUserDTO } from '../dtos/create/CreateUserDTO'
+import { UpdateUserDTO } from '../dtos/update/UpdateUserDTO'
 
 const prisma = new PrismaClient()
 
 // DAO: acesso direto ao banco de dados 🗄️
 export class UserDAO {
-  async createUser(data: {
-    name: string
-    email: string
-    password: string
-  }): Promise<User> {
+  async createUser(data: CreateUserDTO): Promise<User> {
     // Cria usuário no banco 🆕
     return prisma.user.create({ data })
   }
@@ -22,10 +20,7 @@ export class UserDAO {
     return prisma.user.findUnique({ where: { id } })
   }
 
-  async updateUser(
-    id: string,
-    data: { name?: string; email?: string; password?: string }
-  ): Promise<User | null> {
+  async updateUser(id: string, data: UpdateUserDTO): Promise<User | null> {
     return prisma.user.update({ where: { id }, data })
   }
 
