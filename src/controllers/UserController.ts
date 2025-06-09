@@ -8,7 +8,7 @@ import {
 } from '../mappers/input/userInputMapper'
 import { UserRepository } from '../repositories/UserRepository'
 import { UserService } from '../services/UserService'
-import { HandleError } from '../utils/ErrorHandler'
+import { HandleError } from '../utils/HandleError'
 
 // Instâncias de DAO, Repositório e Serviço
 const userDAO = new UserDAO()
