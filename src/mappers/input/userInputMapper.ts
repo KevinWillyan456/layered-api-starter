@@ -13,8 +13,14 @@ import {
 export function toCreateUserDTO(input: CreateUserDTO): CreateUserDTO {
   // Mapeia e normaliza os dados de entrada
   const mapped: CreateUserDTO = {
-    name: input.name.trim().replace(/\s+/g, ' '),
-    email: input.email.trim().toLowerCase(),
+    name:
+      typeof input.name === 'string'
+        ? input.name.trim().replace(/\s+/g, ' ')
+        : input.name,
+    email:
+      typeof input.email === 'string'
+        ? input.email.trim().toLowerCase()
+        : input.email,
     password: input.password // Senha não deve ser alterada aqui
   }
 

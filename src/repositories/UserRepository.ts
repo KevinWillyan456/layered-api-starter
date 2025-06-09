@@ -1,14 +1,15 @@
 import { User } from '@prisma/client'
-import { UserDAO } from '../daos/UserDAO'
 import { CreateUserDTO } from '../dtos/create/CreateUserDTO'
 import { UpdateUserDTO } from '../dtos/update/UpdateUserDTO'
+import { IUserDAO } from '../interfaces/daos/IUserDAO'
+import { IUserRepository } from '../interfaces/repositories/IUserRepository'
 
 // Repository: abstrai o DAO 🧩
-export class UserRepository {
-  private dao: UserDAO
+export class UserRepository implements IUserRepository {
+  private dao: IUserDAO
 
-  constructor(dao: UserDAO) {
-    this.dao = dao
+  constructor(dao: IUserDAO) {
+    this.dao = dao // Injeta o DAO de usuários
   }
 
   async createUser(data: CreateUserDTO): Promise<User> {

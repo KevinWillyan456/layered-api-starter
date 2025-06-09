@@ -10,6 +10,7 @@ import { UserRepository } from '../repositories/UserRepository'
 import { UserService } from '../services/UserService'
 import { HandleError } from '../utils/ErrorHandler'
 
+// Instâncias de DAO, Repositório e Serviço
 const userDAO = new UserDAO()
 const userRepository = new UserRepository(userDAO)
 const userService = new UserService(userRepository)

@@ -1,11 +1,12 @@
 import { PrismaClient, User } from '@prisma/client'
 import { CreateUserDTO } from '../dtos/create/CreateUserDTO'
 import { UpdateUserDTO } from '../dtos/update/UpdateUserDTO'
+import { IUserDAO } from '../interfaces/daos/IUserDAO'
 
 const prisma = new PrismaClient()
 
 // DAO: acesso direto ao banco de dados 🗄️
-export class UserDAO {
+export class UserDAO implements IUserDAO {
   async createUser(data: CreateUserDTO): Promise<User> {
     // Cria usuário no banco 🆕
     return prisma.user.create({ data })

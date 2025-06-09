@@ -5,21 +5,21 @@ import { CreateUserDTO } from '../dtos/create/CreateUserDTO'
 import { UserResponseDTO } from '../dtos/response/UserResponseDTO'
 import { UpdateUserDTO } from '../dtos/update/UpdateUserDTO'
 import { HttpStatus } from '../enums/httpStatus'
+import { IUserRepository } from '../interfaces/repositories/IUserRepository'
 import {
   toUserResponseDTO,
   toUsersResponseDTO
 } from '../mappers/output/userOutputMapper'
-import { UserRepository } from '../repositories/UserRepository'
 import { HttpError } from '../utils/HttpError'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret'
 
 // Service: lógica de negócio 🧠
 export class UserService {
-  private userRepository: UserRepository
+  private userRepository: IUserRepository
 
-  constructor(userRepository: UserRepository) {
-    this.userRepository = userRepository
+  constructor(userRepository: IUserRepository) {
+    this.userRepository = userRepository // Injeta o repositório de usuários
   }
 
   async createUser(
